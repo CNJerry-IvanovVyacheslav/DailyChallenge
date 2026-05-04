@@ -8,25 +8,39 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.melongames.dailychallenge.db.AppDatabase
 
+data class ChallengeData(
+    val streak: Int,
+    val lastCompletionDate: Long
+)
+
 class ChallengeRepository(driverFactory: DatabaseDriverFactory) {
 
     private val database = AppDatabase(driverFactory.createDriver())
     private val queries = database.challengeQueries
 
-    fun getStreakFlow(): Flow<Int> {
+    fun getChallengeFlow(): Flow<ChallengeData> {
         return queries.getChallenge()
             .asFlow()
             .mapToOneOrNull(Dispatchers.Default)
             .map { entity ->
-                entity?.streakCount?.toInt() ?: 0
+                if (entity != null) {
+                    ChallengeData(
+                        streak = entity.streakCount.toInt(),
+                        lastCompletionDate = entity.lastCompletionDate
+                    )
+                } else {
+                    ChallengeData(streak = 0, lastCompletionDate = 0L)
+                }
             }
     }
 
     fun incrementStreak(currentStreak: Int) {
         val newStreak = currentStreak + 1
+        val now = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
+
         queries.insertOrUpdate(
             streakCount = newStreak.toLong(),
-            lastCompletionDate = 0L
+            lastCompletionDate = now
         )
     }
 

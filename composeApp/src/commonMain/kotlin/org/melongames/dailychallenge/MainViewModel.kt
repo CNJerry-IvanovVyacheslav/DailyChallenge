@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.daysUntil
 
 data class MainState(
     val streak: Int = 0,
@@ -33,10 +36,36 @@ class MainViewModel(
 
     private fun observeDatabase() {
         viewModelScope.launch {
-            repository.getStreakFlow().collectLatest { savedStreak ->
+            repository.getChallengeFlow().collectLatest { challengeData ->
+                val today = kotlinx.datetime.Clock.System.now()
+                    .toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+                var activeStreak = challengeData.streak
+                var isCompletedToday = false
+
+                if (challengeData.lastCompletionDate != 0L) {
+                    val lastDate =
+                        kotlinx.datetime.Instant.fromEpochMilliseconds(challengeData.lastCompletionDate)
+                            .toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+                    val daysPassed = lastDate.daysUntil(today)
+
+                    when {
+                        daysPassed == 0 -> {
+                            isCompletedToday = true
+                        }
+
+                        daysPassed > 1 -> {
+                            activeStreak = 0
+                            repository.resetStreak()
+                        }
+                    }
+                }
+
                 _state.update { currentState ->
                     currentState.copy(
-                        streak = savedStreak,
+                        streak = activeStreak,
+                        isCompletedToday = isCompletedToday,
                         isLoading = false
                     )
                 }

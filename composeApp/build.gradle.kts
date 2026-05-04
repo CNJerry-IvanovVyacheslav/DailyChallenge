@@ -47,6 +47,9 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
 
+            //datetime
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
+
             // Coroutines extensions for SQLDelight
             implementation("app.cash.sqldelight:coroutines-extensions:2.0.2")
 
