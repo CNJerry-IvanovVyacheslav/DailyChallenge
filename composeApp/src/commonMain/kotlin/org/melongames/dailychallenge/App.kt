@@ -1,5 +1,6 @@
 package org.melongames.dailychallenge
 
+import DatabaseDriverFactory
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,8 +21,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @Composable
-fun App(viewModel: MainViewModel = viewModel { MainViewModel() }) {
+fun App(driverFactory: DatabaseDriverFactory) {
     MaterialTheme {
+        val viewModel: MainViewModel = viewModel {
+            MainViewModel(ChallengeRepository(driverFactory))
+        }
+
         val state by viewModel.state.collectAsStateWithLifecycle()
 
         Column(
