@@ -10,19 +10,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @Composable
-@Preview
-fun App() {
+fun App(viewModel: MainViewModel = viewModel { MainViewModel() }) {
     MaterialTheme {
-        var streakCount by remember { mutableStateOf(0) }
-        var isCompletedToday by remember { mutableStateOf(false) }
+        val state by viewModel.state.collectAsStateWithLifecycle()
 
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -30,21 +30,24 @@ fun App() {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Твой стрик: $streakCount 🔥",
+                text = "Your streak: ${state.streak} 🔥",
                 style = MaterialTheme.typography.headlineMedium
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = {
-                    isCompletedToday = true
-                    streakCount++
-                },
-                enabled = !isCompletedToday,
+                onClick = { viewModel.onIntent(MainIntent.CompleteChallenge) },
+                enabled = !state.isCompletedToday,
                 modifier = Modifier.fillMaxWidth().height(56.dp)
             ) {
-                Text(if (isCompletedToday) "Задача на сегодня выполнена!" else "Отметить задачу")
+                Text(if (state.isCompletedToday) "Complete!" else "Mark an issue")
+            }
+
+            if (state.streak > 0) {
+                TextButton(onClick = { viewModel.onIntent(MainIntent.ResetProgress) }) {
+                    Text("Reset progress")
+                }
             }
         }
     }
