@@ -32,6 +32,9 @@ kotlin {
 
             // Database driver for Android
             implementation("app.cash.sqldelight:android-driver:2.0.2")
+
+            //Koin
+            implementation("io.insert-koin:koin-android:3.5.6")
         }
 
         commonMain.dependencies {
@@ -46,6 +49,10 @@ kotlin {
 
             // Coroutines extensions for SQLDelight
             implementation("app.cash.sqldelight:coroutines-extensions:2.0.2")
+
+            //Koin
+            implementation("io.insert-koin:koin-core:3.5.6")
+            implementation("io.insert-koin:koin-compose:1.1.5")
         }
 
         iosMain.dependencies {
